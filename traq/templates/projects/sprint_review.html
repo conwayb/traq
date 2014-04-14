@@ -1,0 +1,86 @@
+{% extends "scrum_base.html" %}
+
+{% load tickets %}
+
+{% block page_title %}{{ project.name }}{% endblock %}
+<div class='float-right iblock small'><a href="{% url "accounts-profile" %}assigned?sprint_end={{ sprint_end | date:'c'}}">My Tickets</a></div>
+
+{% block content %}
+<h2>Sprint Review</h2> 
+<h2>{{ project.name }}  
+{% include '_sprint_end_form.html' %}
+</h2>
+<div class='split float-left' style=' margin-top:0px; clear:both'>
+    <h3>
+    {% if perms.tickets.change_ticket %}
+      <a href="{% url "tickets-list" project.pk %}?sprint_end={{ sprint_end | date:'c'}}">Tickets</a> 
+    {% else %}
+      Tickets 
+    {% endif %}
+    <div class='float-right small'>{{tix_completed}}/{{tickets.count}} Completed</div>
+    </h3>
+    <div style='position:relative'>
+    <div class='scroll-table-wrap'>
+    <table class='table-info'>
+    <thead class='sticky'><th>Title</th><th>Assignee</th><th>Status</th></thead>
+    {% for ticket in tickets %}
+        <tr class="{% cycle 'even' 'odd' %}">
+        {% if perms.tickets.change_ticket %}
+          <td><a href="{% url "tickets-detail" ticket.pk %}">{{ticket}}</a></td>
+        {% else %}
+          <td>{{ticket}}</td>
+        {% endif %}
+        <td>{{ticket.assigned_to}}</td>
+        <td>{{ticket.status}}</td></tr>
+    {% empty %}
+        <tr><td>Well, there aren't any. Try here: <a href='{% url 'tickets-list' project.pk %}'>Tickets</a></td></tr>
+    {% endfor %}
+
+    </table>
+  </div>
+</div>
+</div>
+<div class='split float-right' style='margin-top:0px;'>
+    <h3><a href="{% url "todos-list" project.pk%}?sprint_end={{ sprint_end | date:'c'}}">To Do's</a> 
+    <div class='float-right small'>{{todos_completed}}/{{todos.count}} Completed</div>
+    </h3>
+    <div style='position:relative'>
+    <div class='scroll-table-wrap'>
+    <table class='table-info'>
+    <thead class='sticky'><th>Title</th><th>Status</th><th>Tickets</th></thead>
+    {% for todo in todos %}
+        <tr class="{% cycle 'even' 'odd' %}">
+          <td><a href="{% url "todos-detail" todo.pk %}">{{todo}}</a></td>
+          <td>{{todo.status}}</td>
+          <td>{% for ticket in todo.tickets.all %}
+                {% if not forloop.first %},{% endif %}
+                {{ticket.pk}}
+                {% empty %}
+                No Tickets
+                {% endfor %}
+          </td>
+          </tr>
+    {% empty %}
+        <tr><td>Well, there aren't any. Try here: <a href='{% url 'todos-list' project.pk %}'>Todos</a> </td></tr>
+    {% endfor %}
+    </table>
+  </div>
+</div>
+</div>
+<div style='width:100%;clear:right'>
+<hr>
+
+</div>
+<script type='text/javascript'>
+    //sticky table headers 
+    var width = [];
+    $(document).ready(function(){
+        $.each($('thead.sticky th'), function(k,v){
+            w = $(v).width();
+            width.push(w);});
+        $('thead.sticky').css('position', 'absolute');
+        $.each($('thead.sticky th'), function(k,v){
+            $(v).width(width[k]);});
+    });
+</script>
+{% endblock %}

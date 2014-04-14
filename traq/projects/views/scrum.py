@@ -5,6 +5,9 @@ from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Count
+from django.views.generic import View
+from django.utils.decorators import method_decorator
+
 from ..models import Project, Milestone
 from traq.tickets.models import Ticket
 from traq.tickets.filters import TicketFilterSet
@@ -12,52 +15,63 @@ from traq.todos.filters import ToDoFilterSet, ToDoPriorityFilterSet
 from traq.todos.models import ToDo
 from traq.permissions.decorators import can_view_project
 
-@can_view_project
-def dashboard(request, project_id):
-    project = get_object_or_404(Project, pk=project_id)
-    sess_sprint = "sprint_end%d" % project.pk
-    sprint_end = request.session.get(sess_sprint, project.current_sprint_end)
-    ticket_filterset = TicketFilterSet(request.GET, queryset=project.tickets(), project_id = project_id)
-    todo_list = ToDo.objects.prefetch_related('tickets')
-    
-    q = request.GET.get('q', '')
-    if request.GET.get('q'):
-        tickets = ticket_filterset.qs.filter(Q(body__icontains=q)|Q(title__icontains=q)|Q(pk__icontains=q))
-        todos = todo_list.filter(Q(body__icontains=q)|Q(title__icontains=q)|Q(pk__icontains=q), due_on=sprint_end, is_deleted=False)
-    else:
-        tickets = ticket_filterset.qs.order_by("-status__importance", "-global_order", "-assigned_to", "-priority__rank")
-        todos = todo_list.filter(project=project, due_on=sprint_end, is_deleted=False)
-    tickets =tickets.filter(due_on=sprint_end)
-    if project.current_sprint_end is not None:
-        upcoming = todo_list.filter(Q(project=project), Q(due_on__gt=datetime.today())| Q(due_on__isnull=True), is_deleted=False).exclude(due_on=sprint_end).annotate(null_pos=Count('due_on')).order_by('-null_pos','due_on')
-    else:
-        upcoming = None
-    components = project.components()
-    work = project.latestWork(10)
-    milestones = Milestone.objects.filter(project=project)
-    if sprint_end is not None:
-        next = sprint_end + timedelta(days=14) 
-        prev = sprint_end - timedelta(days=14)
-    else:
-        next = None
-        prev = None
-    tix_completed = tickets.filter(Q(status__name='Completed')|Q(status__name='Closed')).count() 
-    todos_completed = todos.filter(Q(status__name='Completed')|Q(status__name='Closed')).count() 
-    return render(request, "projects/dashboard.html", {
-        'project': project,
-        'tickets': tickets,
-        'components': components,
-        'work': work,
-        'milestones': milestones,
-        'filterset': ticket_filterset,
-        'todos': todos,
-        'sprint_end': sprint_end,
-        'next': next,
-        'prev':prev,
-        'upcoming': upcoming,
-        'tix_completed': tix_completed,
-        'todos_completed': todos_completed,
-    })
+#@can_view_project
+class Dashboard(View):
+    template ="projects/dashboard.html"  
+
+    @method_decorator(can_view_project)
+    def dispatch(self, *args, **kwargs):
+        return super(Dashboard, self).dispatch(*args, **kwargs)
+
+    def get(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+        sess_sprint = "sprint_end%d" % project.pk
+        sprint_end = request.session.get(sess_sprint, project.current_sprint_end)
+        ticket_filterset = TicketFilterSet(request.GET, queryset=project.tickets(), project_id = project_id)
+        todo_list = ToDo.objects.prefetch_related('tickets')
+        
+        q = request.GET.get('q', '')
+        if request.GET.get('q'):
+            tickets = ticket_filterset.qs.filter(Q(body__icontains=q)|Q(title__icontains=q)|Q(pk__icontains=q))
+            todos = todo_list.filter(Q(body__icontains=q)|Q(title__icontains=q)|Q(pk__icontains=q), due_on=sprint_end, is_deleted=False)
+        else:
+            tickets = ticket_filterset.qs.order_by("-status__importance", "-global_order", "-assigned_to", "-priority__rank")
+            todos = todo_list.filter(project=project, due_on=sprint_end, is_deleted=False)
+        tickets =tickets.filter(due_on=sprint_end)
+        if project.current_sprint_end is not None:
+            upcoming = todo_list.filter(Q(project=project), Q(due_on__gt=datetime.today())| Q(due_on__isnull=True), is_deleted=False).exclude(due_on=sprint_end).annotate(null_pos=Count('due_on')).order_by('-null_pos','due_on')
+        else:
+            upcoming = None
+        components = project.components()
+        work = project.latestWork(10)
+        milestones = Milestone.objects.filter(project=project)
+        if sprint_end is not None:
+            next = sprint_end + timedelta(days=14) 
+            prev = sprint_end - timedelta(days=14)
+        else:
+            next = None
+            prev = None
+        tix_completed = tickets.filter(Q(status__name='Completed')|Q(status__name='Closed')).count() 
+        todos_completed = todos.filter(Q(status__name='Completed')|Q(status__name='Closed')).count() 
+        return render(request, self.template, {
+            'project': project,
+            'tickets': tickets,
+            'components': components,
+            'work': work,
+            'milestones': milestones,
+            'filterset': ticket_filterset,
+            'todos': todos,
+            'sprint_end': sprint_end,
+            'next': next,
+            'prev':prev,
+            'upcoming': upcoming,
+            'tix_completed': tix_completed,
+            'todos_completed': todos_completed,
+        })
+
+
+class SprintReview(Dashboard):
+   template = 'projects/sprint_review.html' 
 
 @can_view_project
 @permission_required('todos.change_todo')
