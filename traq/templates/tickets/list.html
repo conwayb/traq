@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'scrum_base.html' %}
 {% block scripts %}
 {% endblock %}
 {% block page_title %}Tickets{% endblock %}
@@ -36,7 +36,7 @@
     <tbody>
     {% for ticket in tickets %}
         <tr class='{% cycle 'odd' 'even' %}'>
-            <td style='padding:5px'><a href="{% url "tickets.views.detail" ticket.pk %}">#{{ticket.pk}} {{ ticket.title }}</a> </td>
+            <td style='width: 60%; padding:5px'><a href="{% url "tickets.views.detail" ticket.pk %}">#{{ticket.pk}} {{ ticket.title }}</a> </td>
             <td style='padding:5px'>{{ ticket.status }}</td>
             <td style='padding:5px;'>{{ ticket.assigned_to }}</td> 
             <td style='padding:5px'>{{ ticket.due_on |date:"M d, Y" }}</td>
