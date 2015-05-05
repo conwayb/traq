@@ -1,0 +1,10 @@
+{% extends 'project_base.html' %}
+{% block page_title %}Delete Requirement - {{ object.title }}{% endblock %}
+{% block content %}
+<h3>Delete Requirement</h3>
+<form action="" method="post">{% csrf_token %}
+    <p class='lead'>Are you sure you want to delete "{{ object.title }}"?</p>
+    <input class='btn btn-primary' type="submit" value="Confirm" />
+    <a href="{% url 'requirements-detail' pk=object.pk %}"class='btn btn-default'>Cancel</a>
+</form>
+{% endblock %}

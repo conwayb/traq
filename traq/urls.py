@@ -11,7 +11,8 @@ from .projects.views import components as components
 from .projects.views import reports as reports
 from .projects.views import milestones as milestones
 
-from .requirements.views import RequirementCreateView, RequirementDetailView, RequirementListView, RequirementUpdateView, RequirementApproveView
+from .requirements.views import (RequirementCreateView, RequirementDetailView,
+RequirementListView, RequirementUpdateView, RequirementApproveView, RequirementDeleteView)
 
 from .tickets import views as tickets
 from .tickets.views import work as work
@@ -73,6 +74,7 @@ urlpatterns = patterns('',
     url(r'^projects/(?P<project>\d+)/requirements/$', RequirementListView.as_view(), name='requirements-list'),
     url(r'^requirements/(?P<pk>\d+)/edit/$', RequirementUpdateView.as_view(), name='requirements-edit'),
     url(r'^requirements/(?P<pk>\d+)/detail/$', RequirementDetailView.as_view(), name='requirements-detail'),
+    url(r'^requirements/(?P<pk>\d+)/delete/$', RequirementDeleteView.as_view(), name='requirements-delete'),
 
     # tickets
     url(r'^projects/(\d+)/tickets/create/?$', tickets.create, name='tickets-create'),

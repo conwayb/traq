@@ -1,8 +1,9 @@
 from django.http import JsonResponse
 from django.core.urlresolvers import reverse
 from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 
@@ -13,11 +14,9 @@ from ..projects.models import Project
 class RequirementBaseView(object):
     model = Requirement
 
+    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        if self.request.user.groups.filter(name__in=['arc', 'arcclient']).exists():
-            return super(RequirementBaseView , self).dispatch(*args, **kwargs)
-        else:
-            raise PermissionDenied()
+        return super(RequirementBaseView , self).dispatch(*args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
         data = super(RequirementBaseView, self).get_context_data(*args, **kwargs)
@@ -38,6 +37,12 @@ class RequirementEditBaseView(RequirementBaseView):
     """ """
     form_class = RequirementForm
 
+    def dispatch(self, *args, **kwargs):
+        if self.request.user.has_perm('requirements.add_requirement'):
+            return super(RequirementBaseView, self).dispatch(*args, **kwargs)
+        else:
+            raise PermissionDenied()
+
     def get_success_url(self):
         return reverse('requirements-detail', args=(self.object.pk,))
 
@@ -52,6 +57,10 @@ class RequirementCreateView(RequirementEditBaseView, CreateView):
 
 class RequirementUpdateView(RequirementEditBaseView, UpdateView):
     """ """
+
+class RequirementDeleteView(RequirementEditBaseView, DeleteView):
+    """ """
+    success_url = "/projects/%(project_id)s/requirements/"
 
 class RequirementApproveView(RequirementUpdateView):
     form_class = RequirementApproveForm

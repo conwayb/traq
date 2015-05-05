@@ -2,8 +2,10 @@
 {% block page_title %}Requirement - {{ object.title }}{% endblock %}
 {% block content %}
    <h3>{{ object.title }}
-   <a class='btn btn-primary btn-xs' href="{% url 'requirements-edit' pk=object.pk %}">Edit</a>
-   <a class='btn btn-primary btn-xs' href="{% url 'requirements-create' project=project.pk %}">New Requirement</a>
+    {% if perms.requirements.add_requirement %}
+        <a class='btn btn-primary btn-xs' href="{% url 'requirements-edit' pk=object.pk %}">Edit</a>
+        <a class='btn btn-primary btn-xs' href="{% url 'requirements-create' project=project.pk %}">New Requirement</a>
+    {% endif %}
    </h3>
 <div class="">
     <div class="col-md-12 panel panel-default pull-left  ticket">
@@ -27,4 +29,7 @@
             </ul>
         </div>
     </div>
+    {% if perms.requirements.delete_requirement %}
+   <a class='btn btn-danger btn-xs pull-right' href="{% url 'requirements-delete' pk=object.pk %}">Delete</a>
+   {% endif %}
 {% endblock content %}

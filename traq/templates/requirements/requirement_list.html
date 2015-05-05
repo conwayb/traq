@@ -1,11 +1,15 @@
 {% extends 'project_base.html' %}
 {% block page_title %}Requirements | {{ project.name }} {% endblock %}
 {% block content %}
-<h3>Requirements <small>for</small>{{ project.name }}</h3>
+<h3>Requirements <small>for</small> {{ project.name }}
+    {% if perms.requirements.add_requirement %}
+      <a href="{% url 'requirements-create' project=project.pk %}" class="btn btn-primary btn-xs">New Requirement</a>
+    {% endif %}
+</h3>
+   
   <table class='table'>
       <thead>
-          <th>Title</th>
-          <th>Description</th>
+          <th>Requirement</th>
           <th>Approved</th>
           <th>Approved On</th>
           <th>Approved By</th>
@@ -13,8 +17,8 @@
       <tbody>
       {% for obj in object_list %}
       <tr class='{% if obj.approved %}approved{% endif %}''>
-          <td><a href="{% url 'requirements-detail' pk=obj.pk %}">{{ obj.title}}</a></td>
-          <td>{{obj.description|truncatechars:20}}</td>
+          <td><p><a href="{% url 'requirements-detail' pk=obj.pk %}">{{ obj.title}}</a></p>
+          <p>{{obj.description|truncatechars:100}}</td>
           <td>
               <input data-pk='{{obj.pk}}' name='approved' type='checkbox'{% if  obj.approved %} checked="checked"{% else %}{% endif %}></td>
           <td class='approved_on'>{{ obj.approved_on|default:'&mdash;'}}</td>
@@ -25,7 +29,6 @@
   </table>
 
 <script type='text/javascript'>
-
 $(document).ready(function(){
     $('tr.approved').css('background','#DFF0D8')
     $(':checkbox').change(function(){
