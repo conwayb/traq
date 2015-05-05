@@ -182,6 +182,7 @@ INSTALLED_APPS = (
     'traq.todos',
     'traq.tickets',
     'traq.accounts',
+    'traq.requirements',
     'traq',
     'model_mommy',
     'cloak',

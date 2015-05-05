@@ -1,0 +1,22 @@
+{% extends 'project_base.html' %}
+{% load addcss %}
+
+{% block page_title %}Requirement{% endblock %}
+{% block content %}
+{% if not form.instance.pk %}
+<h3>Create  Requirement</h3>
+{% else %}
+<h3>Edit Requirement</h3>
+{% endif %}
+<form action='' method='POST'>
+    {% csrf_token %}
+    {{ form.title | bootstrap }}
+    {{ form.description| bootstrap }}
+    {{ form.due_date | bs_group:'4' }}
+    {{ form.milestone | bs_group:'4' }}
+    <p class='col-md-12'>
+      <input class='btn btn-primary' type="submit" name="submit" value="Submit" >
+    </p>
+  </form>
+
+{% endblock content %}

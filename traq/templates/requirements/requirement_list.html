@@ -1,0 +1,66 @@
+{% extends 'project_base.html' %}
+{% block page_title %}Requirements | {{ project.name }} {% endblock %}
+{% block content %}
+<h3>Requirements <small>for</small>{{ project.name }}</h3>
+  <table class='table'>
+      <thead>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Approved</th>
+          <th>Approved On</th>
+          <th>Approved By</th>
+      </thead>
+      <tbody>
+      {% for obj in object_list %}
+      <tr class='{% if obj.approved %}approved{% endif %}''>
+          <td><a href="{% url 'requirements-detail' pk=obj.pk %}">{{ obj.title}}</a></td>
+          <td>{{obj.description|truncatechars:20}}</td>
+          <td>
+              <input data-pk='{{obj.pk}}' name='approved' type='checkbox'{% if  obj.approved %} checked="checked"{% else %}{% endif %}></td>
+          <td class='approved_on'>{{ obj.approved_on|default:'&mdash;'}}</td>
+          <td class='approved_by'>{{ obj.approved_by|default:'&mdash;'}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+  </table>
+
+<script type='text/javascript'>
+
+$(document).ready(function(){
+    $('tr.approved').css('background','#DFF0D8')
+    $(':checkbox').change(function(){
+        var that = $(this);
+        var pk = $(this).data('pk');
+        var url = "{% url 'requirements-approve' pk=0 %}";
+        url = url.replace('0', pk);
+        $.ajaxSetup({
+          beforeSend: function(xhr, settings) {  
+            if (!this.crossDomain) {
+               xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+              }
+           }
+        });
+        $.ajax({
+            url : url,
+            type : "POST",
+            data : {'approved': $(this).prop('checked')},
+            success : function(json) {
+                console.log(json)
+                if (!json.approved){
+                  $(that).parents('tr').find('.approved_on').html('&mdash;')
+                  $(that).parents('tr').find('.approved_by').html('&mdash;')
+                   $(that).parents('tr').css('background','white')
+                }
+                else{
+                   var date = new Date(json.approved_on);
+                   options = {'year':'numeric', 'day':'numeric','month':'short','hour':'2-digit', 'minute':'2-digit'}
+                   $(that).parents('tr').find('.approved_on').html(date.toLocaleTimeString('en-US', options))
+                   $(that).parents('tr').find('.approved_by').html(json.approved_by)
+                   $(that).parents('tr').css('background','#DFF0D8')
+                }
+            },
+        });
+     });
+  })
+</script>
+{% endblock content %}

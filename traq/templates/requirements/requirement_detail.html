@@ -1,0 +1,30 @@
+{% extends 'project_base.html' %}
+{% block page_title %}Requirement - {{ object.title }}{% endblock %}
+{% block content %}
+   <h3>{{ object.title }}
+   <a class='btn btn-primary btn-xs' href="{% url 'requirements-edit' pk=object.pk %}">Edit</a>
+   <a class='btn btn-primary btn-xs' href="{% url 'requirements-create' project=project.pk %}">New Requirement</a>
+   </h3>
+<div class="">
+    <div class="col-md-12 panel panel-default pull-left  ticket">
+        <div class="panel-body ticket-body">
+            <div class="markdown">{{ object.description }}</div>
+        </div>
+        <div class="col-md-12 panel-footer pull-left ticket-info ticket-status">
+            <ul class='col-md-4 '>
+                <li><strong>Approved:</strong> {{ object.approved }} </li>
+                {% if object.milestone %}
+                    <li><strong>Milestone:</strong> <a href="{% url 'milestones-detail' object.milestone.pk %}">{{ object.milestone.name }}</a></li>
+                {% endif %}
+            </ul>
+            <ul class='col-md-4 '>
+                <li><strong>Due On:</strong> {{ object.due_date |date:"SHORT_DATE_FORMAT" }} </li>
+            </ul>
+
+            <ul class='col-md-4 '>
+                <li><strong>Created:</strong> <span class="timestamp">{{ object.created_on | date:"SHORT_DATE_FORMAT"}}</span> by {{ object.created_by }}</li>
+                <li><strong>Modified:</strong> <span class="timestamp">{{ object.modified_on | date:"SHORT_DATE_FORMAT"}}</span> by {{ object.modified_by }}</li>
+            </ul>
+        </div>
+    </div>
+{% endblock content %}

@@ -11,6 +11,8 @@ from .projects.views import components as components
 from .projects.views import reports as reports
 from .projects.views import milestones as milestones
 
+from .requirements.views import RequirementCreateView, RequirementDetailView, RequirementListView, RequirementUpdateView, RequirementApproveView
+
 from .tickets import views as tickets
 from .tickets.views import work as work
 from .todos import views as todos
@@ -41,29 +43,36 @@ urlpatterns = patterns('',
     url(r'^projects/(\d+)/meta/?$', projects.meta, name='projects-meta'),
     url(r'^projects/(\d+)/edit_sprint/?$', projects.edit_sprint, name='projects-edit-sprint'),
     url(r'^projects/(\d+)/search/?$', projects.search, name='projects-search'),
-    
+
     #scrum
     url(r'^projects/(\d+)/dashboard/?$', projects.scrum.dashboard, name='projects-dashboard'),
     url(r'^projects/(\d+)/scrum/?$', projects.scrum.scrum, name='projects-scrum'),
     url(r'^projects/(\d+)/which_sprint/?$', projects.scrum.which_sprint, name='projects-which-sprint'),
     url(r'^projects/(\d+)/scrum/backlog/?$', projects.scrum.backlog, name='projects-backlog'),
     url(r'^projects/(\d+)/scrum/sprint_planning/?$', projects.scrum.sprint_planning, name='projects-sprint-planning'),
-    
+
     # components
     url(r'^projects/(\d+)/components/create/?$', components.create, name='components-create'),
     url(r'^components/(\d+)/edit/?$', components.edit, name='components-edit'),
-    
+
     # reports
     url(r'^projects/(\d+)/reports/grid/?$', reports.grid, name='projects-reports-grid'),
     url(r'^projects/(\d+)/reports/component/?$', reports.component, name='projects-reports-component'),
     url(r'^projects/(\d+)/reports/invoice/?$', reports.invoice, name='projects-reports-invoice'),
     url(r'^projects/reports/mega/?$', reports.mega, name='projects-reports-mega'),
     url(r'^projects/reports/summary/?$', reports.summary, name='projects-reports-summary'),
-    
+
     # milestones
     url(r'^projects/(\d+)/milestones/create/?$', milestones.create, name='milestones-create'),
     url(r'^milestones/(\d+)/edit/?$', milestones.edit, name='milestones-edit'),
     url(r'^milestones/(\d+)/detail/?$', milestones.detail, name='milestones-detail'),
+
+    # requirements
+    url(r'^projects/(?P<project>\d+)/requirements/create/$', RequirementCreateView.as_view(), name='requirements-create'),
+    url(r'^requirements/(?P<pk>\d+)/approve/$', RequirementApproveView.as_view(), name='requirements-approve'),
+    url(r'^projects/(?P<project>\d+)/requirements/$', RequirementListView.as_view(), name='requirements-list'),
+    url(r'^requirements/(?P<pk>\d+)/edit/$', RequirementUpdateView.as_view(), name='requirements-edit'),
+    url(r'^requirements/(?P<pk>\d+)/detail/$', RequirementDetailView.as_view(), name='requirements-detail'),
 
     # tickets
     url(r'^projects/(\d+)/tickets/create/?$', tickets.create, name='tickets-create'),
@@ -71,7 +80,7 @@ urlpatterns = patterns('',
     url(r'^tickets/(\d+)/edit/?$', tickets.edit, name='tickets-edit'),
     url(r'^projects/(\d+)/tickets/bulk/?$', tickets.bulk, name='tickets-bulk'),
     url(r'^projects/(\d+)/tickets/?$', tickets.listing, name='tickets-list'),
-    
+
     #to dos
     url(r'^projects/(\d+)/todos/create/?$', todos.create, name='todos-create'),
     url(r'^projects/(\d+)/todos/?$', todos.listing, name='todos-list'),
